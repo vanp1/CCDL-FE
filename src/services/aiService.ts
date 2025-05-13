@@ -37,7 +37,8 @@ export const aiService = {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
-          'HTTP-Referer': window.location.origin,
+          // 'HTTP-Referer': window.location.origin,
+          'HTTP-Referer': 'https://ccdl.netlify.app/',
           'X-Title': 'UCP Calculator'
         },
         body: JSON.stringify({
@@ -153,7 +154,8 @@ Here's the text to analyze: ${text}`
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
-          'HTTP-Referer': window.location.origin,
+          // 'HTTP-Referer': window.location.origin,
+          'HTTP-Referer': 'https://ccdl.netlify.app/',
           'X-Title': 'UCP Calculator'
         },
         body: JSON.stringify({
