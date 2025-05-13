@@ -1,5 +1,5 @@
-const OPENROUTER_API_KEY = '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';
-const MODEL = 'openai/gpt-3.5-turbo-0613';
+const OPENROUTER_API_KEY = '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';
+const MODEL = 'google/gemini-2.0-flash-001';
 
 interface AnalysisResult {
   uaw?: {
@@ -37,8 +37,8 @@ export const aiService = {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
-          // 'HTTP-Referer': window.location.origin,
-          'HTTP-Referer': 'https://ccdl.netlify.app/',
+          'HTTP-Referer': window.location.origin,
+          // 'HTTP-Referer': 'https://ccdl.netlify.app/',
           'X-Title': 'UCP Calculator'
         },
         body: JSON.stringify({
@@ -154,8 +154,8 @@ Here's the text to analyze: ${text}`
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
-          // 'HTTP-Referer': window.location.origin,
-          'HTTP-Referer': 'https://ccdl.netlify.app/',
+          'HTTP-Referer': window.location.origin,
+          // 'HTTP-Referer': 'https://ccdl.netlify.app/',
           'X-Title': 'UCP Calculator'
         },
         body: JSON.stringify({
