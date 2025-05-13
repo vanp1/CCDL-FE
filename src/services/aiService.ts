@@ -290,25 +290,25 @@ EF factors are:
       const jsonMatch = text.match(fullJsonPattern);
 
       if (jsonMatch) {
-        let jsonStr = jsonMatch[0];
+        const jsonStr = jsonMatch[0];
         console.log("Found potential JSON structure:", jsonStr);
 
         // Clean and normalize the JSON
         // 1. Fix common spacing issues
-        jsonStr = jsonStr.replace(/\s+(?=(?:[^"]*"[^"]*")*[^"]*$)/g, ' ');
+        const cleanedJsonStr = jsonStr.replace(/\s+(?=(?:[^"]*"[^"]*")*[^"]*$)/g, ' ');
 
         // 2. Fix quotes (ensure property names are quoted)
-        jsonStr = jsonStr.replace(/([{,]\s*)(\w+)(\s*:)/g, '$1"$2"$3');
+        const quotedJsonStr = cleanedJsonStr.replace(/([{,]\s*)(\w+)(\s*:)/g, '$1"$2"$3');
 
         // 3. Fix extra commas before closing brackets
-        jsonStr = jsonStr.replace(/,\s*}/g, '}').replace(/,\s*]/g, ']');
+        const normalizedJsonStr = quotedJsonStr.replace(/,\s*}/g, '}').replace(/,\s*]/g, ']');
 
         // 4. Try to extract and combine misplaced EF section if it exists outside main object
         const efSectionPattern = /\{\s*"ef"\s*:\s*\{[\s\S]*?\}\s*\}/;
         const efMatch = text.match(efSectionPattern);
 
         try {
-          const result = JSON.parse(jsonStr);
+          const result = JSON.parse(normalizedJsonStr);
 
           // Check if we found a separate EF section and the main JSON doesn't have one
           if (efMatch && !result.ef) {
@@ -327,14 +327,14 @@ EF factors are:
           jsonData = normalizeAnalysisResult(result);
           console.log("Successfully parsed fixed JSON");
         } catch (parseError) {
-          console.error("Failed to parse fixed JSON:", parseError, "with string:", jsonStr);
+          console.error("Failed to parse fixed JSON:", parseError, "with string:", normalizedJsonStr);
         }
       }
 
       // If the above approach failed, try the more granular approach with code blocks
       if (!jsonData) {
         console.log("Trying code block approach");
-        let jsonMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/);
+        const jsonMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/);
 
         if (jsonMatch && jsonMatch[1]) {
           const jsonStr = jsonMatch[1].trim();
@@ -414,7 +414,7 @@ EF factors are:
 
         // If we found potential JSON but failed to parse it, try to fix it
         if (openBrace !== -1 && closeBrace !== -1 && !jsonData) {
-          let jsonStr = text.substring(openBrace, closeBrace + 1);
+          const jsonStr = text.substring(openBrace, closeBrace + 1);
           console.log("Attempting to repair JSON:", jsonStr);
 
           try {
@@ -502,22 +502,21 @@ EF factors are:
                 jsonData.ef = {
                   factors: efData.ef.factors.map((factor: any) => {
                     // Clean up factor IDs and values
-                    let id = factor.id;
-                    let value = factor.value;
+                    const id = factor.id;
+                    const value = factor.value;
 
                     // If id is a string, clean it up
                     if (typeof id === 'string') {
-                      id = parseInt(id.replace(/\s+/g, '').replace(/[^\d]/g, ''));
-                    }
-
-                    // If value is a string, clean it up
-                    if (typeof value === 'string') {
-                      value = parseFloat(value.replace(/\s+/g, ''));
+                      const cleanedId = parseInt(id.replace(/\s+/g, '').replace(/[^\d]/g, ''));
+                      return {
+                        id: isNaN(cleanedId) ? 0 : cleanedId,
+                        value: isNaN(value) ? 0 : parseFloat(value.replace(/\s+/g, ''))
+                      };
                     }
 
                     return {
                       id: isNaN(id) ? 0 : id,
-                      value: isNaN(value) ? 0 : value
+                      value: isNaN(value) ? 0 : parseFloat(value.replace(/\s+/g, ''))
                     };
                   })
                 };
@@ -610,17 +609,25 @@ function normalizeAnalysisResult(data: any): AnalysisResult {
     result.tcf = {
       factors: factorsArray.map((factor: any) => {
         // Handle malformed factor IDs and values
-        let id = factor.id;
-        let value = factor.value;
+        const id = factor.id;
+        const value = factor.value;
 
         // Clean up ID if it's a string with non-numeric characters
         if (typeof id === 'string') {
-          id = parseInt(id.replace(/\s+/g, '').replace(/[^\d]/g, ''));
+          const cleanedId = parseInt(id.replace(/\s+/g, '').replace(/[^\d]/g, ''));
+          return {
+            id: isNaN(cleanedId) ? 0 : cleanedId,
+            value: convertToNumber(value)
+          };
         }
 
         // Handle value, which might be a string with spaces or other characters
         if (typeof value === 'string') {
-          value = parseFloat(value.replace(/\s+/g, ''));
+          const cleanedValue = parseFloat(value.replace(/\s+/g, ''));
+          return {
+            id: isNaN(id) ? 0 : id,
+            value: convertToNumber(cleanedValue)
+          };
         }
 
         return {
@@ -641,17 +648,25 @@ function normalizeAnalysisResult(data: any): AnalysisResult {
     result.ef = {
       factors: factorsArray.map((factor: any) => {
         // Handle malformed factor IDs and values
-        let id = factor.id;
-        let value = factor.value;
+        const id = factor.id;
+        const value = factor.value;
 
         // Clean up ID if it's a string with non-numeric characters
         if (typeof id === 'string') {
-          id = parseInt(id.replace(/\s+/g, '').replace(/[^\d]/g, ''));
+          const cleanedId = parseInt(id.replace(/\s+/g, '').replace(/[^\d]/g, ''));
+          return {
+            id: isNaN(cleanedId) ? 0 : cleanedId,
+            value: convertToNumber(value)
+          };
         }
 
         // Handle value, which might be a string with spaces or other characters
         if (typeof value === 'string') {
-          value = parseFloat(value.replace(/\s+/g, ''));
+          const cleanedValue = parseFloat(value.replace(/\s+/g, ''));
+          return {
+            id: isNaN(id) ? 0 : id,
+            value: convertToNumber(cleanedValue)
+          };
         }
 
         return {
